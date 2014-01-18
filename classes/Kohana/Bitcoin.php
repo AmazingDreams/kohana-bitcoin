@@ -89,7 +89,7 @@ class Kohana_Bitcoin {
 		}
 
 		// If there's no result
-		if($result === FALSE)
+		if( ! isset($result) || $result === FALSE)
 		{
 			$result = $this->_run($method);
 
@@ -143,6 +143,13 @@ class Kohana_Bitcoin {
 	 */
 	protected function _method_cache($method, $value = NULL)
 	{
+		// Check if caching is disabled
+		if($this->_config('cache') === FALSE)
+		{
+			return FALSE;
+		}
+
+		// Check if method itself is cacheable
 		if( ! Arr::path($this->_rpcmethods, "$method.cacheable"))
 		{
 			return FALSE;

@@ -1,5 +1,13 @@
 <?php defined('SYSPATH') or die('No direct script access');
 
+/**
+ * Class Kohana Bitcoin
+ *
+ * @package    Kohana-bitcoin
+ * @category   Helper
+ * @author     Dennis Ruhe
+ * @copyright  (c) 2013 Dennis Ruhe
+ */
 class Kohana_Bitcoin {
 
 	/**
@@ -102,11 +110,22 @@ class Kohana_Bitcoin {
 		return Arr::get($this->_config, $key);
 	}
 
+	/**
+	 * Get the cache status, enabled or disabled
+	 *
+	 * @return  boolean  TRUE  if enabled
+	 *                   FALSE if disabled
+	 */
 	public function cache_enabled()
 	{
 		return $this->config('cache') !== FALSE;
 	}
 
+	/**
+	 * Get the instance name of this bitcoin object
+	 *
+	 * @return  String  Instance name
+	 */
 	public function instance_name()
 	{
 		return $this->_instance_name;
@@ -125,4 +144,5 @@ class Kohana_Bitcoin {
 			->parameters($parameters)
 			->execute();
 	}
-}
+
+} // End Kohana Bitcoin

@@ -5,7 +5,6 @@ Use kohana to talk to a bitcoin RPC server
 
 
 # TODO
-- Create Bitcoin_RPC_Request
 - Create Bitcoin_RPC_Response
 - Create Bitcoin_RPC_Invalid_Method_Exception (or someting of similar name)
 

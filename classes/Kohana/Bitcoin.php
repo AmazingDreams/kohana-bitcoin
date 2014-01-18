@@ -71,7 +71,7 @@ class Kohana_Bitcoin {
 		// Check if a valid method was requested
 		if( ! array_key_exists($method, $this->_rpcmethods))
 		{
-			throw new Bitcoin_Invalid_Method_Exception('Invalid method :method called', array(
+			throw new Bitcoin_Invalid_RPC_Method_Exception('Invalid method :method called', array(
 				':method' => $method,
 			));
 		}

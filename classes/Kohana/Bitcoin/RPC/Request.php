@@ -4,8 +4,6 @@ abstract class Kohana_Bitcoin_RPC_Request extends Request {
 
 	protected $_bitcoin = NULL;
 
-	protected $_command = NULL;
-
 	protected $_is_cacheable = FALSE;
 
 	protected $_parameters = array();
@@ -25,6 +23,18 @@ abstract class Kohana_Bitcoin_RPC_Request extends Request {
 
 		$this->headers('Content-Type', 'application/json')
 			->method('post');
+	}
+
+	/**
+	 * Get the command, derived from the filename using reflection
+	 *
+	 * @return  String  Command
+	 */
+	private function _command()
+	{
+		$reflection = new ReflectionClass($this);
+
+		return strtolower(str_replace(EXT, '', basename($reflection->getFileName())));
 	}
 
 	public function parameters($parameters = array())
@@ -55,7 +65,7 @@ abstract class Kohana_Bitcoin_RPC_Request extends Request {
 		if( ! isset($response) OR $response === NULL)
 		{
 			$this->body(json_encode(array(
-				'method' => $this->_command,
+				'method' => $this->_command(),
 				'params' => $this->_parameters,
 				'id'     => 'jsonrpc',
 			)));

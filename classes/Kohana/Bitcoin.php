@@ -1,5 +1,13 @@
 <?php defined('SYSPATH') or die('No direct script access');
 
+/**
+ * Class Kohana Bitcoin
+ *
+ * @package    Kohana-bitcoin
+ * @category   Helper
+ * @author     Dennis Ruhe
+ * @copyright  (c) 2013 Dennis Ruhe
+ */
 class Kohana_Bitcoin {
 
 	/**
@@ -8,22 +16,9 @@ class Kohana_Bitcoin {
 	protected static $_instances = array();
 
 	/**
-	 * @var  Array  Holds the available rpc methods and information about them
+	 * @var  Array  Holds the instance name
 	 */
-	protected $_rpcmethods = array(
-		'getbalance' => array(
-			'cacheable' => TRUE,
-		),
-		'getinfo' => array(
-			'cacheable' => TRUE,
-		),
-		'getmininginfo' => array(
-			'cacheable' => TRUE,
-		),
-		'help' => array(
-			'cacheable' => TRUE,
-		),
-	);
+	protected $_instance_name = 'default';
 
 	/**
 	 * @var  Array  Configurations and their default values, these will be overwritten by whatever is in config/bitcoin
@@ -49,7 +44,7 @@ class Kohana_Bitcoin {
 
 		if($bitcoin === NULL)
 		{
-			$bitcoin = new self(Kohana::$config->load("bitcoin.$conf"));
+			$bitcoin = new self($conf);
 
 			self::$_instances[$conf] = $bitcoin;
 		}
@@ -68,35 +63,14 @@ class Kohana_Bitcoin {
 	 */
 	public function __call($method, $args)
 	{
-		// Check if a valid method was requested
-		if( ! array_key_exists($method, $this->_rpcmethods))
-		{
-			throw new Bitcoin_Invalid_RPC_Method_Exception('Invalid method :method called', array(
-				':method' => $method,
-			));
-		}
-
 		// If we are in the development environment we wish to benchmark this
 		if(Kohana::$environment === Kohana::DEVELOPMENT)
 		{
 			$benchmark = Profiler::start("Kohana-Bitcoin", $method);
 		}
 
-		// If caching is enabled
-		if($this->_config('cache'))
-		{
-			$result = $this->_method_cache($method);
-		}
-
 		// If there's no result
-		if( ! isset($result) || $result === FALSE)
-		{
-			$result = $this->_run($method);
-
-			// Set the method cache
-			// There's a check if it should be set in the _method_cache
-			$this->_method_cache($method, $result);
-		}
+		$result = $this->_run($method);
 
 		// Stop the benchmark if it was made
 		if(isset($benchmark))
@@ -114,8 +88,10 @@ class Kohana_Bitcoin {
 	 */
 	protected function __construct($config)
 	{
+		$this->_instance_name = $config;
+
 		// Merge the given configuration with the default
-		$this->_config = Arr::merge($this->_config, $config);
+		$this->_config = Arr::merge($this->_config, Kohana::$config->load("bitcoin.$config"));
 	}
 
 	/**
@@ -124,7 +100,7 @@ class Kohana_Bitcoin {
 	 * @param   String  Key to get
 	 * @return  Mixed   Whatever is in there
 	 */
-	protected function _config($key = NULL)
+	public function config($key = NULL)
 	{
 		if($key === NULL)
 		{
@@ -135,44 +111,24 @@ class Kohana_Bitcoin {
 	}
 
 	/**
-	 * Get or set the method cache
+	 * Get the cache status, enabled or disabled
 	 *
-	 * @param   String  Method to get/set cache
-	 * @param   Mixed   Whatever the value is
-	 * @return  Mixed   Whatever the cached value is, or FALSE if no there was no chache
+	 * @return  boolean  TRUE  if enabled
+	 *                   FALSE if disabled
 	 */
-	protected function _method_cache($method, $value = NULL)
+	public function cache_enabled()
 	{
-		// Check if caching is disabled
-		if($this->_config('cache') === FALSE)
-		{
-			return FALSE;
-		}
+		return $this->config('cache') !== FALSE;
+	}
 
-		// Check if method itself is cacheable
-		if( ! Arr::path($this->_rpcmethods, "$method.cacheable"))
-		{
-			return FALSE;
-		}
-
-		// Cache for this request
-		if($this->_config('cache') === TRUE)
-		{
-			if($value !== NULL)
-			{
-				return Arr::set_path($this->_rpcmethods, "$method.cache", $value);
-			}
-
-			return Arr::path($this->_rpcmethods, "$method.cache", FALSE);
-		}
-
-		// Use given cache object
-		if($value !== NULL)
-		{
-			return Cache::instance($this->_config('cache'))->set($method, $value, $this->_config('cache_lifetime'));
-		}
-
-		return Cache::instance($this->_config('cache'))->get($method);
+	/**
+	 * Get the instance name of this bitcoin object
+	 *
+	 * @return  String  Instance name
+	 */
+	public function instance_name()
+	{
+		return $this->_instance_name;
 	}
 
 	/**
@@ -181,28 +137,12 @@ class Kohana_Bitcoin {
 	 * @param   String                Command to run against the service
 	 * @return  Bitcoin_RPC_Response  Response object
 	 */
-	protected function _run($command)
+	protected function _run($command, $parameters = array())
 	{
 		// Build the url
-		$url = 'http://<username>:<password>@<hostname>:<port>/';
-		$url = str_replace('<username>', $this->_config('rpcuser'), $url);
-		$url = str_replace('<password>', $this->_config('rpcpassword'), $url);
-		$url = str_replace('<hostname>', $this->_config('host'), $url);
-		$url = str_replace('<port>',     $this->_config('port'), $url);
-
-		// Build the request
-		$request = Request::factory($url)
-			->headers('Content-Type', 'application/json')
-			->method('post')
-			->body(json_encode(array(
-				'method' => $command,
-				'params' => array(),
-				'id'     => 'jsonrpc',
-			)));
-
-		// Execute the request
-		$result = $request->execute();
-
-		return json_decode($result);
+		return Bitcoin_RPC_Request::create($command, $this)
+			->parameters($parameters)
+			->execute();
 	}
-}
+
+} // End Kohana Bitcoin

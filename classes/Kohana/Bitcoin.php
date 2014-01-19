@@ -70,7 +70,7 @@ class Kohana_Bitcoin {
 		}
 
 		// If there's no result
-		$result = $this->_run($method);
+		$result = $this->_run($method, $args);
 
 		// Stop the benchmark if it was made
 		if(isset($benchmark))

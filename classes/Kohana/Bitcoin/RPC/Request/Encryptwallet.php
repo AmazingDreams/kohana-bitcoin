@@ -3,8 +3,8 @@
 /**
  * Class Kohana Bitcoin RPC Request Encryptwallet
  *
- * @package    Kohana-bitcoin
- * @category   Helper
+ * @package    Kohana/Bitcoin
+ * @category   RPC Request
  * @author     Dennis Ruhe
  * @copyright  (c) 2013 Dennis Ruhe
  */

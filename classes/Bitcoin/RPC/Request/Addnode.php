@@ -3,7 +3,7 @@
 /**
  * Class Bitcoin RPC Request Addnode
  *
- * @package    Kohana-bitcoin
+ * @package    Kohana/Bitcoin
  * @category   Helper
  * @author     Dennis Ruhe
  * @copyright  (c) 2013 Dennis Ruhe

@@ -3,7 +3,7 @@
 /**
  * Class Kohana Bitcoin RPC Cache
  *
- * @package    Kohana-bitcoin
+ * @package    Kohana/Bitcoin
  * @category   Helper
  * @author     Dennis Ruhe
  * @copyright  (c) 2013 Dennis Ruhe

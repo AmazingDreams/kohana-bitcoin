@@ -8,4 +8,4 @@
  * @author     Dennis Ruhe
  * @copyright  (c) 2013 Dennis Ruhe
  */
-class Bitcoin_RPC_Request_Sendmany extends Kohana_Bitcoin_RPC_Request_Sendmany {}
+class Bitcoin_RPC_Request_Getbalance extends Kohana_Bitcoin_RPC_Request_Getbalance {}

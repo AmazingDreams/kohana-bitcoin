@@ -15,4 +15,15 @@ class Kohana_Bitcoin_RPC_Request_Validateaddress extends Bitcoin_RPC_Request {
 	 */
 	protected $_is_cacheable = FALSE;
 
+	public function execute()
+	{
+		$result = parent::execute();
+
+		// If no error, return isvalid
+		if($result->error == NULL)
+			return $result->result->isvalid;
+
+		return $result;
+	}
+
 } // End Kohana Bitcoin RPC Request Validateaddress
